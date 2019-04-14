@@ -23,8 +23,8 @@ import itertools
 STANFORD_CORENLP_3_4_1_JAR = 'stanford-corenlp-3.4.1.jar'
 
 # punctuations to be removed from the sentences
-PUNCTUATIONS = ["''", "'", "``", "`", "-LRB-", "-RRB-", "-LCB-", "-RCB-", \
-        ".", "?", "!", ",", ":", "-", "--", "...", ";"] 
+PUNCTUATIONS = ["''", "'", "``", "`", "-LRB-", "-RRB-", "-LCB-", "-RCB-",
+                ".", "?", "!", ",", ":", "-", "--", "...", ";"]
 
 class PTBTokenizer:
     """Python wrapper of Stanford PTBTokenizer"""
@@ -32,9 +32,14 @@ class PTBTokenizer:
         self.source = _source
 
     def tokenize(self, captions_for_image):
-        cmd = ['java', '-cp', STANFORD_CORENLP_3_4_1_JAR, \
-                'edu.stanford.nlp.process.PTBTokenizer', \
-                '-preserveLines', '-lowerCase']
+        # cmd = ['java', '-cp', STANFORD_CORENLP_3_4_1_JAR, \
+        #         'edu.stanford.nlp.process.PTBTokenizer', \
+        #         '-preserveLines', '-lowerCase']
+        cmd = ['/data/leuven/329/vsc32913/jdk-11.0.2/bin/java -cp '
+               '/data/leuven/329/vsc32913/ga-img-captioning/cider/pyciderevalcap/tokenizer/stanford-corenlp-3.4.1.jar '
+               '/data/leuven/329/vsc32913/ga-img-captioning/cider/pyciderevalcap/tokenizer/'
+               'edu.stanford.nlp.process.PTBTokenizer -preserveLines -lowerCase ']
+        # '/data/leuven/329/vsc32913/ga-img-captioning/cider/pyciderevalcap/tokenizer/']
 
         # ======================================================
         # prepare data for PTB Tokenizer
@@ -54,7 +59,7 @@ class PTBTokenizer:
         # ======================================================
         # save sentences to temporary file
         # ======================================================
-        path_to_jar_dirname=os.path.dirname(os.path.abspath(__file__))
+        path_to_jar_dirname = os.path.dirname(os.path.abspath(__file__))
         tmp_file = tempfile.NamedTemporaryFile(delete=False, dir=path_to_jar_dirname)
         tmp_file.write(sentences.encode('utf-8'))
         tmp_file.close()
@@ -63,8 +68,11 @@ class PTBTokenizer:
         # tokenize sentence
         # ======================================================
         cmd.append(os.path.basename(tmp_file.name))
-        p_tokenizer = subprocess.Popen(cmd, cwd=path_to_jar_dirname, \
-                stdout=subprocess.PIPE)
+        print(cmd)
+        # p_tokenizer = subprocess.Popen(cmd, cwd=path_to_jar_dirname,
+        #                                stdout=subprocess.PIPE, shell=True)
+        p_tokenizer = subprocess.Popen(cmd,
+                                       stdout=subprocess.PIPE, shell=True)
         token_lines = p_tokenizer.communicate(input=sentences.rstrip())[0]
         lines = token_lines.decode("utf-8").split('\n')
         # remove temp file
